@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Overview — מערכת ועדות חריגים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a2e4a;
+    --blue: #1f4e79;
+    --mid: #2e75b6;
+    --light: #d6e4f0;
+    --accent: #0ea5e9;
+    --gold: #c8922a;
+    --text: #1e293b;
+    --muted: #64748b;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Heebo', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    direction: rtl;
+    line-height: 1.7;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    position: fixed;
+    right: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--navy);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-logo {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .sidebar-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex: 1; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: all .15s;
+    border-right: 3px solid transparent;
+    cursor: pointer;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+    border-right-color: var(--accent);
+  }
+
+  .nav-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    width: 18px;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-num { color: var(--accent); }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-right: 240px;
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, #1d5fa3 100%);
+    padding: 80px 60px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: 200px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(14,165,233,0.08);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    background: rgba(14,165,233,0.12);
+    border: 1px solid rgba(14,165,233,0.3);
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-subtitle {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 36px;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 7px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .meta-pill svg { opacity: 0.6; }
+
+  /* ── SECTIONS ── */
+  .content { padding: 0 60px 80px; }
+
+  .section {
+    padding-top: 60px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: rgba(14,165,233,0.08);
+    border: 1px solid rgba(14,165,233,0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .sub-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue);
+    margin: 24px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sub-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--mid);
+    border-radius: 2px;
+    display: block;
+  }
+
+  p { font-size: 14px; color: var(--muted); margin-bottom: 12px; line-height: 1.75; }
+
+  /* ── BULLETS ── */
+  .bullets { list-style: none; margin: 8px 0 16px; }
+  .bullets li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--text);
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .bullets li:last-child { border-bottom: none; }
+  .bullets li::before {
+    content: '▸';
+    color: var(--accent);
+    font-size: 11px;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── TABLES ── */
+  .tbl-wrap { overflow-x: auto; margin: 12px 0 24px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  thead tr { background: var(--blue); }
+  thead th {
+    padding: 12px 16px;
+    text-align: right;
+    font-weight: 600;
+    color: #fff;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  tbody tr:nth-child(even) { background: #f0f7ff; }
+  tbody tr:hover { background: #e8f2fb; }
+  tbody td { padding: 11px 16px; color: var(--text); border-bottom: 1px solid var(--border); line-height: 1.5; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ── RISK TABLE ── */
+  .risk-high { color: #dc2626; font-weight: 600; }
+  .risk-mid  { color: #d97706; font-weight: 600; }
+  .risk-low  { color: #16a34a; font-weight: 600; }
+
+  .risk-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .risk-badge.high { background: #fee2e2; color: #dc2626; }
+  .risk-badge.mid  { background: #fef3c7; color: #d97706; }
+
+  /* ── PROCESS FLOW ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0 24px;
+    position: relative;
+  }
+
+  .flow::before {
+    content: '';
+    position: absolute;
+    top: 20px; right: 19px;
+    width: 2px;
+    bottom: 20px;
+    background: linear-gradient(to bottom, var(--accent), var(--light));
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 0;
+    position: relative;
+  }
+
+  .flow-dot {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    flex-shrink: 0;
+    z-index: 1;
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+
+  .flow-text {
+    padding-top: 8px;
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  /* ── TECH STACK ── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+
+  .stack-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  .stack-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(14,165,233,0.1);
+  }
+
+  .stack-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stack-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    font-family: var(--mono);
+  }
+
+  /* ── STAKEHOLDER CARDS ── */
+  .people-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+
+  .person-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .person-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .person-name { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .person-role { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+
+  /* ── TIMELINE ── */
+  .timeline { margin: 16px 0 24px; }
+
+  .tl-item {
+    display: grid;
+    grid-template-columns: 1fr 90px 90px;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    background: var(--surface);
+    transition: border-color .15s;
+  }
+
+  .tl-item:hover { border-color: var(--mid); }
+  .tl-phase { font-size: 13px; font-weight: 500; color: var(--text); }
+  .tl-dur { font-size: 12px; color: var(--muted); text-align: center; }
+  .tl-date { font-family: var(--mono); font-size: 11px; color: var(--accent); text-align: left; }
+
+  /* ── GLOSSARY ── */
+  .glossary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .gl-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .gl-term {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    min-width: 60px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .gl-def { font-size: 12.5px; color: var(--text); line-height: 1.45; }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    padding: 24px 60px;
+    margin-right: 0;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-right: 0; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-right: 0; }
+    .hero { padding: 40px 24px 36px; }
+    .content { padding: 0 24px 60px; }
+    .glossary { grid-template-columns: 1fr; }
+    .stack-grid { grid-template-columns: 1fr 1fr; }
+    .people-grid { grid-template-columns: 1fr; }
+    .tl-item { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">System Overview</div>
+    <div class="sidebar-title">מערכת ועדות חריגים</div>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-item active" href="#overview"><span class="nav-num">01</span>סקירה כללית</a>
+    <a class="nav-item" href="#architecture"><span class="nav-num">02</span>ארכיטקטורה</a>
+    <a class="nav-item" href="#integrations"><span class="nav-num">03</span>ממשקים</a>
+    <a class="nav-item" href="#processes"><span class="nav-num">04</span>תהליכים עסקיים</a>
+    <a class="nav-item" href="#security"><span class="nav-num">05</span>אבטחת מידע</a>
+    <a class="nav-item" href="#testing"><span class="nav-num">06</span>בדיקות</a>
+    <a class="nav-item" href="#risks"><span class="nav-num">07</span>סיכונים</a>
+    <a class="nav-item" href="#stakeholders"><span class="nav-num">08</span>גורמים מעורבים</a>
+    <a class="nav-item" href="#timeline"><span class="nav-num">09</span>תוכנית עבודה</a>
+    <a class="nav-item" href="#glossary"><span class="nav-num">10</span>מילון מונחים</a>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-label">SYSTEM OVERVIEW · V1.0</div>
+    <div class="hero-title">מערכת <span>ועדות חריגים</span></div>
+    <div class="hero-subtitle">משרד הרווחה והשירותים החברתיים · אגף בכיר טכנולוגיות דיגיטליות ומידע</div>
+    <div class="hero-meta">
+      <div class="meta-pill">
+        <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="white" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+        4 מחוזות + מטה
+      </div>
+      <div class="meta-pill">
+        <svg width="13" height="13" fill="none" viewBox="0 0 16 16"><path d="M8 2a6 6 0 100 12A6 6 0 008 2z" stroke="white" stroke-width="1.3"/><path d="M8 6v2l1.5 1.5" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+        .NET Core + Angular 7
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- 1. Overview -->
+    <section class="section" id="overview">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2 class="section-title">סקירה כללית</h2>
+      </div>
+
+      <div class="sub-title">תיאור המערכת</div>
+      <p>מערכת ועדות חריגים מנהלת את תהליך בקשות ההקלה בהשתתפות עצמית של לקוחות רווחה — ממשלוח הפניה ממחלקות לשירותים חברתיים (מש"ח) ברשויות המקומיות, דרך דיון בוועדת חריגים במחוז, ועד מתן ההחלטה ועדכון הלקוח.</p>
+
+      <div class="sub-title">רקע לפיתוח המערכת</div>
+      <p>המערכת הקיימת אינה נותנת מענה הולם לצרכים הנוכחיים:</p>
+      <ul class="bullets">
+        <li>תקשורת עם מש"ח מתבצעת בדואר רגיל ובטפסים פיזיים — ללא מיחשוב ישיר</li>
+        <li>המערכת הקיימת תומכת רק בסוג פניות אחד (מסגרות לקטינים)</li>
+        <li>מגיעה כמות גדולה של מידע לא רלוונטי — דוחות סוציאליים מלאים</li>
+        <li>קושי בניהול מכסות, מעקב תקציבי ויצירת דוחות מתקדמים</li>
+        <li>אובדן מסמכים ותקשורת מילולית מרובה בין המשרד למש"ח</li>
+      </ul>
+
+      <div class="sub-title">היקף השימוש</div>
+      <ul class="bullets">
+        <li>4 מחוזות: צפון, דרום, מרכז, ירושלים — בנוסף למטה</li>
+        <li>סוגי משתמשים: מפקחים מחוזיים, עובדים סוציאליים, עובדי זכאות, מנהלי מש"ח, מדריכי צוות</li>
+        <li>מחלקות לשירותים חברתיים בכלל רשויות המקומיות בישראל</li>
+        <li>גורמי מטה: אחראי ערעורים, אחראי רטרו</li>
+      </ul>
+
+      <div class="sub-title">קריטיות המערכת</div>
+      <p>קריטיות גבוהה — המערכת מנהלת החלטות המשפיעות ישירות על תשלומי לקוחות רווחה, כולל קטינים, אזרחים ותיקים ומוגבלויות. כל עיכוב או תקלה עלולים לפגוע במתן שירות לאוכלוסיות רגישות.</p>
+    </section>
+
+    <!-- 2. Architecture -->
+    <section class="section" id="architecture">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2 class="section-title">ארכיטקטורה וטכנולוגיה</h2>
+      </div>
+
+      <div class="sub-title">סטאק טכנולוגי</div>
+      <div class="stack-grid">
+        <div class="stack-card"><div class="stack-label">Backend</div><div class="stack-value">.NET Core · C#</div></div>
+        <div class="stack-card"><div class="stack-label">Frontend</div><div class="stack-value">Angular 7</div></div>
+        <div class="stack-card"><div class="stack-label">IDE</div><div class="stack-value">Visual Studio 2017</div></div>
+        <div class="stack-card"><div class="stack-label">סוג ממשק</div><div class="stack-value">Web App</div></div>
+        <div class="stack-card"><div class="stack-label">שירות חיצוני</div><div class="stack-value">WCF Service</div></div>
+        <div class="stack-card"><div class="stack-label">ניהול משתמשים</div><div class="stack-value">Active Directory</div></div>
+        <div class="stack-card"><div class="stack-label">נגישות חיצונית</div><div class="stack-value">ממשל זמין</div></div>
+        <div class="stack-card"><div class="stack-label">דוחות</div><div class="stack-value">BI Integration</div></div>
+      </div>
+
+      <div class="sub-title">רכיבי המערכת</div>
+      <ul class="bullets">
+        <li>מערכת WEB — לשימוש המפקחים במחוזות ובמטה לניהול ועדות, החלטות ודוחות</li>
+        <li>שירות WCF — מוחצן לחברות המחשוב במש"ח לצורך שליחת פניות וקבלת תשובות</li>
+        <li>אינטגרציה עם מערכת מס"ר — עדכון השמות ופרטי ההשתתפות (מסגרות קטינים)</li>
+        <li>מחולל דוחות — כימותים, חיתוכים, פילוחים, ואינטגרציה עם מערכת BI</li>
+      </ul>
+    </section>
+
+    <!-- 3. Integrations -->
+    <section class="section" id="integrations">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2 class="section-title">ממשקים ואינטגרציות</h2>
+      </div>
+
+      <div class="sub-title">מערכות פנימיות</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>שם המערכת</th><th>כיוון</th><th>תיאור</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>נתוני יסוד</td><td>קליטה בלבד</td><td>שליפת נתוני ראש המשפחה והילדים</td></tr>
+            <tr><td>מס"ר — מסגרות רווחה</td><td>דו-כיווני</td><td>שליפת השמות ועדכון השתתפויות בהשמה</td></tr>
+            <tr><td>מערכת BI</td><td>שליחה בלבד</td><td>אינטגרציה לדוחות ניהוליים ואנליטיים</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-title">מערכות חיצוניות</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>שם המערכת</th><th>כיוון</th><th>תיאור</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>מערכות מש"ח (אוטומציה, מטרופולינט, EPR, אורות רווחה)</td><td>דו-כיווני</td><td>שליחת פניות וקבלת החלטות דרך שירות WCF</td></tr>
+            <tr><td>ממשל זמין</td><td>גישה נכנסת</td><td>החצנת השירות לגורמי מש"ח חיצוניים</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. Processes -->
+    <section class="section" id="processes">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2 class="section-title">תהליכים עסקיים מרכזיים</h2>
+      </div>
+
+      <div class="sub-title">סוגי פניות</div>
+      <ul class="bullets">
+        <li>הקלה במסגרות קטינים (ילד, נוער ומוגבלויות)</li>
+        <li>הקלה בתוכניות מיוחדות — מרכזי מניעת אלימות, נוצ"ץ, נפגעי התמכרויות</li>
+        <li>הקלה בהשמת אזרח ותיק בבתי אבות</li>
+        <li>הקלה בסיוע חומרי</li>
+      </ul>
+
+      <div class="sub-title">זרימת התהליך</div>
+      <div class="flow">
+        <div class="flow-step"><div class="flow-dot">1</div><div class="flow-text">לקוח פונה לעו"ס ברשות המקומית בבקשת הקלה בהשתתפות</div></div>
+        <div class="flow-step"><div class="flow-dot">2</div><div class="flow-text">עו"ס בודק נזקקות ומעביר לבדיקת זכאות אצל עו"ז</div></div>
+        <div class="flow-step"><div class="flow-dot">3</div><div class="flow-text">עו"ס שולח פניה דיגיטלית למחוז הרלוונטי דרך שירות ה-WCF</div></div>
+        <div class="flow-step"><div class="flow-dot">4</div><div class="flow-text">ועדת חריגים במחוז (מפקח מחוזי + מפקח שירות) דנה בפניה</div></div>
+        <div class="flow-step"><div class="flow-dot">5</div><div class="flow-text">ניתנת החלטה: הנחה / פטור / דחייה — כולל דרגת ההנחה</div></div>
+        <div class="flow-step"><div class="flow-dot">6</div><div class="flow-text">ההחלטה נשלחת למש"ח ומתעדכנת במס"ר (מסגרות קטינים)</div></div>
+        <div class="flow-step"><div class="flow-dot">7</div><div class="flow-text">בפניות מסגרות קטינים — אפשרות ערעור ברמת המטה</div></div>
+      </div>
+
+      <div class="sub-title">תהליכים תפעוליים נוספים</div>
+      <ul class="bullets">
+        <li>ניהול מכסות לפי מחוז — ויסות מכסות בין מחוזות</li>
+        <li>טיפול בפניות רטרואקטיביות</li>
+        <li>ניהול עזיבות — לקוחות שעזבו מסגרות באמצע שנה</li>
+        <li>הפקת דוחות ניהוליים — עלויות, ניצול מכסות, פילוחים</li>
+      </ul>
+    </section>
+
+    <!-- 5. Security -->
+    <section class="section" id="security">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2 class="section-title">אבטחת מידע והרשאות</h2>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>קבוצת משתמשים</th><th>מנגנון אימות</th><th>הערות</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>מפקחים מחוזיים ומטה</td><td>Active Directory</td><td>הרשאות לפי תפקיד ברמת המודול</td></tr>
+            <tr><td>גורמי מש"ח חיצוניים</td><td>ממשל זמין</td><td>גישה דרך שירות WCF בלבד</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>רמת סיכון אבטחת מידע: נמוכה-בינונית. הגישה החיצונית מוגבלת לשירות WCF ומאובטחת דרך ממשל זמין. המשתמשים הפנימיים מאומתים דרך Active Directory ארגוני.</p>
+    </section>
+
+    <!-- 6. Testing -->
+    <section class="section" id="testing">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2 class="section-title">תהליכי בדיקות</h2>
+      </div>
+
+      <div class="sub-title">מצב הבדיקות כיום</div>
+      <ul class="bullets">
+        <li>בדיקות QA מבוצעות בסבבים לפני כל גרסה — לפי תוכנית עבודה מוגדרת</li>
+        <li>שלב בדיקות QA מוגדר בתוכנית העבודה כחודש אחד</li>
+        <li>שלב בדיקות משתמשים (UAT) מוגדר כשבוע</li>
+        <li>המערכת כוללת סביבות נפרדות לבדיקות — נדרש אישור על תצורת הסביבות הקיימות</li>
+      </ul>
+
+      <div class="sub-title">נדרש לתשתית אוטומציה</div>
+      <ul class="bullets">
+        <li>גישה לסביבת TEST מבודדת — ממשק WEB מלא</li>
+        <li>גישה לשירות WCF בסביבת TEST לבדיקות API</li>
+        <li>נתוני בדיקה (test data) — פרטי לקוחות, פניות, מסגרות</li>
+        <li>תיעוד ה-API של שירות WCF — WSDL / specs</li>
+        <li>תיאור User Flows מלא לכל 4 סוגי הפניות</li>
+      </ul>
+    </section>
+
+    <!-- 7. Risks -->
+    <section class="section" id="risks">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2 class="section-title">סיכונים מרכזיים</h2>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>תיאור סיכון</th><th>רמת סיכון</th><th>פעולה מונעת</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>תלות בפיתוח חיצוני של מערכות מש"ח</td><td><span class="risk-badge high">גבוהה · 25</span></td><td>פתרונות עוקפים ואפיון מקומי</td></tr>
+            <tr><td>2</td><td>ליווי והדרכה מקצועית לצוותי פיתוח</td><td><span class="risk-badge high">גבוהה · 25</span></td><td>הדרכות פרטניות ויעוץ תשתיתי</td></tr>
+            <tr><td>3</td><td>עמידה בלוחות זמנים</td><td><span class="risk-badge high">גבוהה · 20</span></td><td>הפניית משאבים ותיאום ציפיות</td></tr>
+            <tr><td>4</td><td>פיתוח דוחות ריכוזיים</td><td><span class="risk-badge mid">בינונית · 16</span></td><td>אפיון דוחות בשלב הפיתוח</td></tr>
+            <tr><td>5</td><td>התממשקות לממשל זמין ומערכות חיצוניות</td><td><span class="risk-badge mid">בינונית · 16</span></td><td>בדיקת היתכנות בשלב האפיון</td></tr>
+            <tr><td>6</td><td>הסבת נתונים ממערכת קודמת</td><td><span class="risk-badge mid">בינונית · 12</span></td><td>בדיקת ההסבה בשלב QA</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 8. Stakeholders -->
+    <section class="section" id="stakeholders">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2 class="section-title">גורמים מעורבים</h2>
+      </div>
+
+      <div class="sub-title">מנהלת הפרויקט</div>
+      <div class="people-grid">
+        <div class="person-card"><div class="person-avatar">חל</div><div><div class="person-name">חפציבה ליינר</div><div class="person-role">מנהלת פרויקטים — אגף בכיר טכנולוגיות דיגיטליות ומידע</div></div></div>
+        <div class="person-card"><div class="person-avatar">ימ</div><div><div class="person-name">ימימה כהן</div><div class="person-role">מנהלת תחום בכיר יישומים</div></div></div>
+        <div class="person-card"><div class="person-avatar">דמ</div><div><div class="person-name">ד"ר דיצה מורלי שגיב</div><div class="person-role">ראש אגף בכיר ארגון מינהל ופיתוח ברשו"מ</div></div></div>
+        <div class="person-card"><div class="person-avatar">רש</div><div><div class="person-name">רון שביט</div><div class="person-role">סגן ראש אגף בכיר ארגון מינהל ופיתוח ברשו"מ</div></div></div>
+        <div class="person-card"><div class="person-avatar">ונ</div><div><div class="person-name">ורדה נבון</div><div class="person-role">ראש ענף — האגף לשירותים חברתיים</div></div></div>
+      </div>
+
+      <div class="sub-title">משתמשי קצה</div>
+      <ul class="bullets">
+        <li>מפקחים מחוזיים — אגף אומ"פ (4 מחוזות)</li>
+        <li>גורמי מטה — אחראי ערעורים, אחראי רטרו</li>
+        <li>עובדים סוציאליים (עו"ס) ועובדי זכאות (עו"ז) במש"ח</li>
+        <li>מנהלי מש"ח ומדריכי צוות (מדר"צ)</li>
+      </ul>
+    </section>
+
+    <!-- 9. Timeline -->
+    <section class="section" id="timeline">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2 class="section-title">תוכנית עבודה</h2>
+      </div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-phase">אפיון המערכת והשירות</div><div class="tl-dur">3 חודשים</div><div class="tl-date">אפריל 2019</div></div>
+        <div class="tl-item"><div class="tl-phase">פיתוח המערכת והשירות</div><div class="tl-dur">6 חודשים</div><div class="tl-date">אוקטובר 2019</div></div>
+        <div class="tl-item"><div class="tl-phase">הסבה וטיוב נתונים ממערכת קודמת</div><div class="tl-dur">3 שבועות</div><div class="tl-date">נובמבר 2019</div></div>
+        <div class="tl-item"><div class="tl-phase">בדיקות QA וליווי</div><div class="tl-dur">חודש</div><div class="tl-date">דצמבר 2019</div></div>
+        <div class="tl-item"><div class="tl-phase">בדיקות משתמשים, הטמעה והדרכה</div><div class="tl-dur">שבוע</div><div class="tl-date">ינואר 2020</div></div>
+        <div class="tl-item"><div class="tl-phase">מרווח בטחון</div><div class="tl-dur">חודש</div><div class="tl-date">פברואר 2020</div></div>
+      </div>
+    </section>
+
+    <!-- 10. Glossary -->
+    <section class="section" id="glossary">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2 class="section-title">מילון מונחים</h2>
+      </div>
+      <div class="glossary">
+        <div class="gl-item"><div class="gl-term">מש"ח</div><div class="gl-def">מחלקה לשרותים חברתיים</div></div>
+        <div class="gl-item"><div class="gl-term">עו"ס</div><div class="gl-def">עובד סוציאלי</div></div>
+        <div class="gl-item"><div class="gl-term">עו"ז</div><div class="gl-def">עובד מינהל וזכאות</div></div>
+        <div class="gl-item"><div class="gl-term">מדר"צ</div><div class="gl-def">מדריך צוות</div></div>
+        <div class="gl-item"><div class="gl-term">אומ"פ</div><div class="gl-def">אגף ארגון מינהל ופיתוח ברשויות המקומיות</div></div>
+        <div class="gl-item"><div class="gl-term">רשו"מ</div><div class="gl-def">רשויות מקומיות</div></div>
+        <div class="gl-item"><div class="gl-term">מס"ר</div><div class="gl-def">מסגרות רווחה — מערכת רוחבית במשרד הרווחה</div></div>
+        <div class="gl-item"><div class="gl-term">WCF</div><div class="gl-def">Windows Communication Foundation — שירות תקשורת</div></div>
+        <div class="gl-item"><div class="gl-term">ויסות מכסות</div><div class="gl-def">העברת מכסות ממחוז למחוז</div></div>
+        <div class="gl-item"><div class="gl-term">פרוטוקול ועדה</div><div class="gl-def">מסמך המפרט נתוני הועדה והחלטתה</div></div>
+        <div class="gl-item"><div class="gl-term">ממשל זמין</div><div class="gl-def">פלטפורמת ממשלת ישראל לשירותים דיגיטליים</div></div>
+        <div class="gl-item"><div class="gl-term">נוצ"ץ</div><div class="gl-def">נוער וצעירים</div></div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="footer">
+    מסמך זה מיועד לשימוש ספק האוטומציה · אגף מערכות מידע · משרד הרווחה והשירותים החברתיים
+  </div>
+</main>
+
+<script>
+  // Active nav on scroll
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
